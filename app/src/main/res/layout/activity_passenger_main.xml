@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              xmlns:tools="http://schemas.android.com/tools"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:orientation="vertical"
+              tools:context="com.cuit.diditaxi.activity.PassengerMainActivity">
+
+    <android.support.v4.widget.DrawerLayout
+        android:id="@+id/drawer_passenger_main"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+            <android.support.v7.widget.Toolbar
+                android:id="@+id/toolbar_passenger_main"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:background="@color/white_01"/>
+
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1">
+
+                <com.amap.api.maps.MapView
+                    android:id="@+id/map_view_passenger_main"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"/>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="96dp"
+                    android:layout_gravity="bottom"
+                    android:layout_marginBottom="18dp"
+                    android:layout_marginLeft="10dp"
+                    android:layout_marginRight="10dp"
+                    android:background="@color/white_01"
+                    android:orientation="vertical"
+                    android:paddingBottom="2dp"
+                    android:paddingLeft="8dp"
+                    android:paddingRight="8dp"
+                    android:paddingTop="2dp">
+
+                    <TextView
+                        android:id="@+id/tv_passenger_start"
+                        android:layout_width="match_parent"
+                        android:layout_height="0dp"
+                        android:layout_marginBottom="2dp"
+                        android:layout_weight="1"
+                        android:background="@drawable/bg_list_item"
+                        android:clickable="true"
+                        android:drawableLeft="@drawable/icon_start"
+                        android:drawablePadding="8dp"
+                        android:gravity="center_vertical"
+                        android:singleLine="true"
+                        android:text="起点"/>
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="0.6dp"
+                        android:background="@color/gray_01"/>
+
+                    <TextView
+                        android:id="@+id/tv_passenger_destination"
+                        android:layout_width="match_parent"
+                        android:layout_height="0dp"
+                        android:layout_marginTop="2dp"
+                        android:layout_weight="1"
+                        android:background="@drawable/bg_list_item"
+                        android:clickable="true"
+                        android:drawableLeft="@drawable/icon_end"
+                        android:drawablePadding="8dp"
+                        android:gravity="center_vertical"
+                        android:singleLine="true"
+                        android:text="终点"/>
+                </LinearLayout>
+            </FrameLayout>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/layout_passenger_main_left_menu"
+            android:layout_width="240dp"
+            android:layout_height="match_parent"
+            android:layout_gravity="start"
+            android:background="@color/white_01">
+
+            <ListView
+                android:id="@+id/list_passenger_main_left_menu"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:divider="@color/gray_01"
+                android:dividerHeight="1dp"/>
+        </LinearLayout>
+
+    </android.support.v4.widget.DrawerLayout>
+</LinearLayout>

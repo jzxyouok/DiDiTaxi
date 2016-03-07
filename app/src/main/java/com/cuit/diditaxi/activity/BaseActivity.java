@@ -2,6 +2,8 @@ package com.cuit.diditaxi.activity;
 
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.view.Window;
+import android.widget.Toast;
 
 import cn.jpush.im.android.api.JMessageClient;
 import cn.jpush.im.android.api.enums.ConversationType;
@@ -19,7 +21,7 @@ public class BaseActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
+        supportRequestWindowFeature(Window.FEATURE_NO_TITLE);
         JMessageClient.registerEventReceiver(this);
     }
 
@@ -59,4 +61,11 @@ public class BaseActivity extends AppCompatActivity {
         }
     }
 
+    public void showToastShort(String content){
+        Toast.makeText(getApplicationContext(),content,Toast.LENGTH_SHORT).show();
+    }
+
+    public void showToastLong(String content){
+        Toast.makeText(getApplicationContext(),content,Toast.LENGTH_LONG).show();
+    }
 }

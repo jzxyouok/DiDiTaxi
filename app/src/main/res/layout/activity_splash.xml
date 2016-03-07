@@ -1,10 +1,33 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@drawable/splash_bg"
-    tools:context="com.cuit.diditaxi.activity.SplashActivity">
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                xmlns:tools="http://schemas.android.com/tools"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:paddingLeft="60dp"
+                android:paddingRight="60dp"
+                android:background="@drawable/splash_bg"
+                android:gravity="center_horizontal"
+                tools:context="com.cuit.diditaxi.activity.SplashActivity">
 
+    <Button
+        android:id="@+id/btn_splash_passenger"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:layout_marginBottom="20dp"
+        android:layout_above="@+id/btn_splash_driver"
+        android:background="@drawable/bg_btn_splash"
+        android:text="乘客"
+        android:textSize="18sp"
+        android:textColor="@android:color/white"/>
+
+    <Button
+        android:id="@+id/btn_splash_driver"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="100dp"
+        android:background="@drawable/bg_btn_splash"
+        android:text="司机"
+        android:textSize="18sp"
+        android:textColor="@android:color/white"/>
 </RelativeLayout>
