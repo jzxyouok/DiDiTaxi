@@ -77,7 +77,8 @@
                         android:drawablePadding="8dp"
                         android:gravity="center_vertical"
                         android:singleLine="true"
-                        android:text="终点"/>
+                        android:text="你要去哪儿？"
+                        android:textColor="@color/orange_01"/>
                 </LinearLayout>
             </FrameLayout>
 

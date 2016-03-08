@@ -11,6 +11,7 @@ import com.cuit.diditaxi.model.User;
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import cn.bmob.v3.BmobUser;
 import cn.bmob.v3.listener.SaveListener;
 
 public class PassengerLoginActivity extends BaseActivity {
@@ -39,6 +40,7 @@ public class PassengerLoginActivity extends BaseActivity {
                 Intent intent = new Intent();
                 intent.setClass(PassengerLoginActivity.this, PassengerMainActivity.class);
                 startActivity(intent);
+                finish();
             }
 
             @Override
@@ -55,5 +57,15 @@ public class PassengerLoginActivity extends BaseActivity {
         setContentView(R.layout.activity_passenger_login);
 
         ButterKnife.bind(this);
+
+        //判断是否已登录
+        if (BmobUser.getCurrentUser(PassengerLoginActivity.this, User.class) != null) {
+
+            //登录JMessage
+
+            Intent intent = new Intent(PassengerLoginActivity.this, PassengerMainActivity.class);
+            startActivity(intent);
+            finish();
+        }
     }
 }

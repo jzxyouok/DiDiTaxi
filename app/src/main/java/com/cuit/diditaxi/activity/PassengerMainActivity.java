@@ -1,5 +1,6 @@
 package com.cuit.diditaxi.activity;
 
+import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.PersistableBundle;
@@ -51,6 +52,7 @@ import java.util.List;
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import cn.bmob.v3.BmobUser;
 
 public class PassengerMainActivity extends BaseActivity implements LocationSource, AMapLocationListener {
 
@@ -139,6 +141,12 @@ public class PassengerMainActivity extends BaseActivity implements LocationSourc
             @Override
             public void itemLongClick(View view, int position) {
 
+                String option = mOptionList.get(position);
+                if (option.equals("退出登录")){
+                    BmobUser.logOut(PassengerMainActivity.this);
+                    Intent intent=new Intent(PassengerMainActivity.this,SplashActivity.class);
+                    startActivity(intent);
+                }
             }
         });
 
