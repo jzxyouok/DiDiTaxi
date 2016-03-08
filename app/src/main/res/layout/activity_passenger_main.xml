@@ -19,8 +19,9 @@
             <android.support.v7.widget.Toolbar
                 android:id="@+id/toolbar_passenger_main"
                 android:layout_width="match_parent"
-                android:layout_height="48dp"
-                android:background="@color/white_01"/>
+                android:layout_height="wrap_content"
+                android:background="?attr/colorPrimary">
+            </android.support.v7.widget.Toolbar>
 
             <FrameLayout
                 android:layout_width="match_parent"
@@ -34,14 +35,14 @@
 
                 <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="96dp"
+                    android:layout_height="wrap_content"
                     android:layout_gravity="bottom"
                     android:layout_marginBottom="18dp"
                     android:layout_marginLeft="10dp"
                     android:layout_marginRight="10dp"
                     android:background="@color/white_01"
                     android:orientation="vertical"
-                    android:paddingBottom="2dp"
+                    android:paddingBottom="4dp"
                     android:paddingLeft="8dp"
                     android:paddingRight="8dp"
                     android:paddingTop="2dp">
@@ -49,9 +50,8 @@
                     <TextView
                         android:id="@+id/tv_passenger_start"
                         android:layout_width="match_parent"
-                        android:layout_height="0dp"
+                        android:layout_height="46dp"
                         android:layout_marginBottom="2dp"
-                        android:layout_weight="1"
                         android:background="@drawable/bg_list_item"
                         android:clickable="true"
                         android:drawableLeft="@drawable/icon_start"
@@ -68,9 +68,8 @@
                     <TextView
                         android:id="@+id/tv_passenger_destination"
                         android:layout_width="match_parent"
-                        android:layout_height="0dp"
+                        android:layout_height="46dp"
                         android:layout_marginTop="2dp"
-                        android:layout_weight="1"
                         android:background="@drawable/bg_list_item"
                         android:clickable="true"
                         android:drawableLeft="@drawable/icon_end"
@@ -79,6 +78,16 @@
                         android:singleLine="true"
                         android:text="你要去哪儿？"
                         android:textColor="@color/orange_01"/>
+
+                    <Button
+                        android:id="@+id/btn_look_for_car"
+                        android:layout_width="match_parent"
+                        android:layout_height="38dp"
+                        android:background="@drawable/bg_btn_passenger_main"
+                        android:text="寻找车辆"
+                        android:textColor="@android:color/black"
+                        android:textSize="16sp"
+                        android:visibility="gone"/>
                 </LinearLayout>
             </FrameLayout>
 

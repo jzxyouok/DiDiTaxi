@@ -31,4 +31,5 @@ public class MyApplication extends Application {
         JMessageClient.setNotificationMode(JMessageClient.NOTI_MODE_DEFAULT);
         new NotificationClickEventReceiver(getApplicationContext());
     }
+
 }

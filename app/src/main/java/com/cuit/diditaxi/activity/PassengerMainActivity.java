@@ -3,7 +3,6 @@ package com.cuit.diditaxi.activity;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
-import android.os.PersistableBundle;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -11,6 +10,7 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -108,6 +108,14 @@ public class PassengerMainActivity extends BaseActivity implements LocationSourc
     @Bind(R.id.tv_passenger_destination)
     TextView mTvDestination;
 
+    @Bind(R.id.btn_look_for_car)
+    Button mBtnLookForCar;
+
+    @OnClick(R.id.btn_look_for_car)
+    void lookForCar(){
+
+    }
+
     @OnClick(R.id.tv_passenger_start)
     void start() {
 
@@ -115,6 +123,7 @@ public class PassengerMainActivity extends BaseActivity implements LocationSourc
 
     @OnClick(R.id.tv_passenger_destination)
     void destination() {
+
 
     }
 
@@ -152,8 +161,8 @@ public class PassengerMainActivity extends BaseActivity implements LocationSourc
 
         //Toolbar
         mToolbar.setTitle("");
-        setSupportActionBar(mToolbar);
         mToolbar.setNavigationIcon(R.drawable.default_avatar_me);
+        setSupportActionBar(mToolbar);
 
         //DrawerLayout
         mDrawerLayout.addDrawerListener(new DrawerLayout.DrawerListener() {
@@ -347,11 +356,6 @@ public class PassengerMainActivity extends BaseActivity implements LocationSourc
         deactivate();
     }
 
-    @Override
-    public void onSaveInstanceState(Bundle outState, PersistableBundle outPersistentState) {
-        super.onSaveInstanceState(outState, outPersistentState);
-        mMapView.onSaveInstanceState(outState);
-    }
 
     @Override
     protected void onDestroy() {
@@ -451,7 +455,7 @@ public class PassengerMainActivity extends BaseActivity implements LocationSourc
                 }
 
                 //Camera移动到定位位置
-                CameraPosition position = new CameraPosition(mLocateLatLng,17,0,0);
+                CameraPosition position = new CameraPosition(mLocateLatLng,16,0,0);
                 CameraUpdate cameraUpdate = CameraUpdateFactory.newCameraPosition(position);
                 if (isFirstIn){
                     mAMap.animateCamera(cameraUpdate, new AMap.CancelableCallback() {
