@@ -4,12 +4,13 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.os.PersistableBundle;
 import android.support.v4.widget.DrawerLayout;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.LinearLayout;
-import android.widget.ListView;
 import android.widget.TextView;
 
 import com.amap.api.location.AMapLocation;
@@ -40,8 +41,11 @@ import com.amap.api.services.geocoder.GeocodeSearch;
 import com.amap.api.services.geocoder.RegeocodeQuery;
 import com.amap.api.services.geocoder.RegeocodeResult;
 import com.cuit.diditaxi.R;
+import com.cuit.diditaxi.adapter.PassengerOptionAdapter;
 import com.cuit.diditaxi.model.CloudMarkerOverlay;
+import com.cuit.diditaxi.view.ListRecyclerViewDivider;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import butterknife.Bind;
@@ -88,8 +92,10 @@ public class PassengerMainActivity extends BaseActivity implements LocationSourc
     @Bind(R.id.layout_passenger_main_left_menu)
     LinearLayout mLayoutLeftMenu;
 
-    @Bind(R.id.list_passenger_main_left_menu)
-    ListView mListLeftMenu;
+    @Bind(R.id.rv_passenger_main_left_menu)
+    RecyclerView mRecyclerView;
+    private List<String> mOptionList;
+    private PassengerOptionAdapter mOptionAdapter;
 
     @Bind(R.id.toolbar_passenger_main)
     Toolbar mToolbar;
@@ -116,6 +122,25 @@ public class PassengerMainActivity extends BaseActivity implements LocationSourc
         setContentView(R.layout.activity_passenger_main);
 
         ButterKnife.bind(this);
+
+        //Option
+        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
+        linearLayoutManager.setOrientation(LinearLayoutManager.VERTICAL);
+        mRecyclerView.setLayoutManager(linearLayoutManager);
+        ListRecyclerViewDivider itemDivider = new ListRecyclerViewDivider(this, LinearLayoutManager.VERTICAL);
+        mRecyclerView.addItemDecoration(itemDivider);
+
+        mOptionList = new ArrayList<>();
+        mOptionList.add("退出登录");
+        mOptionAdapter = new PassengerOptionAdapter(PassengerMainActivity.this,mOptionList);
+        mRecyclerView.setAdapter(mOptionAdapter);
+        //OptionItem点击监听
+        mOptionAdapter.setOnItemClickListener(new PassengerOptionAdapter.OnItemClickListener() {
+            @Override
+            public void itemLongClick(View view, int position) {
+
+            }
+        });
 
         //Toolbar
         mToolbar.setTitle("");
