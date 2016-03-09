@@ -52,6 +52,8 @@ import com.amap.api.services.route.WalkRouteResult;
 import com.cuit.diditaxi.R;
 import com.cuit.diditaxi.adapter.PassengerOptionAdapter;
 import com.cuit.diditaxi.model.CloudMarkerOverlay;
+import com.cuit.diditaxi.utils.NumberUtil;
+import com.cuit.diditaxi.utils.TimeUtil;
 import com.cuit.diditaxi.view.ListRecyclerViewDivider;
 
 import java.util.ArrayList;
@@ -130,7 +132,7 @@ public class PassengerMainActivity extends BaseActivity implements LocationSourc
 
     @OnClick(R.id.btn_look_for_car)
     void lookForCar() {
-
+        setupMap();
     }
 
     @OnClick(R.id.tv_passenger_start)
@@ -299,7 +301,7 @@ public class PassengerMainActivity extends BaseActivity implements LocationSourc
         //指南针,默认false
         uiSettings.setCompassEnabled(true);
         //比例尺，默认false
-        uiSettings.setScaleControlsEnabled(true);
+//        uiSettings.setScaleControlsEnabled(true);
 
         /**
          * 自定义定位结果显示突变
@@ -563,12 +565,14 @@ public class PassengerMainActivity extends BaseActivity implements LocationSourc
                                     }
 
                                     mTvCost.setVisibility(View.VISIBLE);
-                                    mTvCost.setText("距离：".concat(String.valueOf(totalDistance)).concat("时间：").concat(String.valueOf(totalDuration)));
+                                    //1米，0.005
+                                    mTvCost.setText("预计费用:".concat(NumberUtil.roundHalfUp(totalDistance * 0.005)).concat("元  距离:").concat(NumberUtil.meterToKm(totalDistance)).concat("  预计用时:").concat(TimeUtil.formatSecond(totalDuration)));
                                     mBtnLookForCar.setVisibility(View.VISIBLE);
 
                                     mAMap.clear();
                                     DrivingRouteOverlay drivingRouteOverlay = new DrivingRouteOverlay(PassengerMainActivity.this, mAMap, drivePath, driveRouteResult.getStartPos(), driveRouteResult.getTargetPos());
-                                    drivingRouteOverlay.removeFromMap();
+                                    drivingRouteOverlay.setNodeIconVisibility(false);
+//                                    drivingRouteOverlay.removeFromMap();
                                     drivingRouteOverlay.addToMap();
                                     drivingRouteOverlay.zoomToSpan();
                                 }

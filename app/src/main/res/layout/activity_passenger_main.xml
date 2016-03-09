@@ -23,6 +23,11 @@
                 android:background="?attr/colorPrimary">
             </android.support.v7.widget.Toolbar>
 
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="0.6dp"
+                android:background="@color/gray_01"/>
+
             <FrameLayout
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
@@ -52,13 +57,12 @@
                         android:layout_width="match_parent"
                         android:layout_height="46dp"
                         android:layout_marginBottom="2dp"
-                        android:background="@drawable/bg_list_item"
                         android:clickable="true"
                         android:drawableLeft="@drawable/icon_start"
                         android:drawablePadding="8dp"
                         android:gravity="center_vertical"
                         android:singleLine="true"
-                        android:text="起点"/>
+                        />
 
                     <View
                         android:layout_width="match_parent"
@@ -95,6 +99,7 @@
                         android:singleLine="true"
                         tools:text="预估费用100元，距离200km，预计用时30分钟"
                         android:textColor="@android:color/black"
+                        android:textSize="12sp"
                         android:visibility="gone"/>
 
                     <Button
