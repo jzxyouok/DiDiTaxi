@@ -13,6 +13,8 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 import cn.bmob.v3.BmobUser;
 import cn.bmob.v3.listener.SaveListener;
+import cn.jpush.im.android.api.JMessageClient;
+import cn.jpush.im.api.BasicCallback;
 
 public class PassengerLoginActivity extends BaseActivity {
 
@@ -35,12 +37,23 @@ public class PassengerLoginActivity extends BaseActivity {
         user.login(PassengerLoginActivity.this, new SaveListener() {
             @Override
             public void onSuccess() {
-                mBtnLogin.setEnabled(true);
 
-                Intent intent = new Intent();
-                intent.setClass(PassengerLoginActivity.this, PassengerMainActivity.class);
-                startActivity(intent);
-                finish();
+                //登录JMessage
+                JMessageClient.login(mEtUsername.getText().toString(), "111111", new BasicCallback() {
+                    @Override
+                    public void gotResult(int i, String s) {
+                        mBtnLogin.setEnabled(true);
+
+                        if (i == 0) {
+                            Intent intent = new Intent();
+                            intent.setClass(PassengerLoginActivity.this, PassengerMainActivity.class);
+                            startActivity(intent);
+                            finish();
+                        } else {
+                            showToastLong(s.concat("------").concat(String.valueOf(i)));
+                        }
+                    }
+                });
             }
 
             @Override
@@ -59,9 +72,8 @@ public class PassengerLoginActivity extends BaseActivity {
         ButterKnife.bind(this);
 
         //判断是否已登录
-        if (BmobUser.getCurrentUser(PassengerLoginActivity.this, User.class) != null) {
-
-            //登录JMessage
+        if (BmobUser.getCurrentUser(PassengerLoginActivity.this, User.class) != null
+                &&JMessageClient.getMyInfo()!=null) {
 
             Intent intent = new Intent(PassengerLoginActivity.this, PassengerMainActivity.class);
             startActivity(intent);
