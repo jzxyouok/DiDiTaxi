@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              xmlns:tools="http://schemas.android.com/tools"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:orientation="vertical"
+              android:background="@color/white_01"
+              tools:context="com.cuit.diditaxi.activity.PassengerSelectEndActivity">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:orientation="horizontal">
+
+        <ImageButton
+            android:id="@+id/btn_select_end_back"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/bg_list_item"
+            android:src="@drawable/btn_back"/>
+
+        <EditText
+            android:id="@+id/et_select_end_keyword"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:inputType="text"
+            android:hint="请输入目的地"/>
+
+        <Button
+            android:id="@+id/btn_select_end_search"
+            android:layout_width="wrap_content"
+            android:layout_height="40dp"
+            android:layout_marginRight="4dp"
+            android:background="@drawable/bg_btn_passenger_main"
+            android:text="搜索"/>
+    </LinearLayout>
+
+    <Space
+        android:layout_width="match_parent"
+        android:layout_height="40dp"/>
+
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/rv_select_end_recommend_position"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
+</LinearLayout>

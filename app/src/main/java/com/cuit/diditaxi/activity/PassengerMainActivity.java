@@ -31,6 +31,7 @@ import com.amap.api.maps.model.LatLng;
 import com.amap.api.maps.model.Marker;
 import com.amap.api.maps.model.MarkerOptions;
 import com.amap.api.maps.model.MyLocationStyle;
+import com.amap.api.maps.overlay.DrivingRouteOverlay;
 import com.amap.api.services.cloud.CloudItem;
 import com.amap.api.services.cloud.CloudItemDetail;
 import com.amap.api.services.cloud.CloudResult;
@@ -41,6 +42,13 @@ import com.amap.api.services.geocoder.GeocodeResult;
 import com.amap.api.services.geocoder.GeocodeSearch;
 import com.amap.api.services.geocoder.RegeocodeQuery;
 import com.amap.api.services.geocoder.RegeocodeResult;
+import com.amap.api.services.help.Tip;
+import com.amap.api.services.route.BusRouteResult;
+import com.amap.api.services.route.DrivePath;
+import com.amap.api.services.route.DriveRouteResult;
+import com.amap.api.services.route.DriveStep;
+import com.amap.api.services.route.RouteSearch;
+import com.amap.api.services.route.WalkRouteResult;
 import com.cuit.diditaxi.R;
 import com.cuit.diditaxi.adapter.PassengerOptionAdapter;
 import com.cuit.diditaxi.model.CloudMarkerOverlay;
@@ -65,8 +73,13 @@ public class PassengerMainActivity extends BaseActivity implements LocationSourc
     private LocationSource.OnLocationChangedListener mLocationChangedListener;
     private AMapLocationClient mLocationClient = null;
     private AMapLocationClientOption mLocationOption = null;
+    private String mCity;
     //定位结果，坐标
     private LatLng mLocateLatLng = null;
+    //出发地坐标
+    private LatLonPoint mStartLatLonPoint = null;
+    //目的地坐标
+    private LatLonPoint mEndLatLonPoint = null;
 
     //------地理编码----
     private GeocodeSearch mGeocodeSearch;
@@ -87,6 +100,10 @@ public class PassengerMainActivity extends BaseActivity implements LocationSourc
     private MarkerOptions mMarkerOptions;
 
     private boolean isFirstIn = true;
+    private boolean isStopUpdateStart = false;
+
+    @Bind(R.id.tv_passenger_cost)
+    TextView mTvCost;
 
     @Bind(R.id.drawer_passenger_main)
     DrawerLayout mDrawerLayout;
@@ -112,7 +129,7 @@ public class PassengerMainActivity extends BaseActivity implements LocationSourc
     Button mBtnLookForCar;
 
     @OnClick(R.id.btn_look_for_car)
-    void lookForCar(){
+    void lookForCar() {
 
     }
 
@@ -124,7 +141,12 @@ public class PassengerMainActivity extends BaseActivity implements LocationSourc
     @OnClick(R.id.tv_passenger_destination)
     void destination() {
 
-
+        //选择目的地
+        if (mCity != null) {
+            Intent intent = new Intent(PassengerMainActivity.this, PassengerSelectEndActivity.class);
+            intent.putExtra("city", mCity);
+            startActivityForResult(intent, 0);
+        }
     }
 
     @Override
@@ -143,7 +165,7 @@ public class PassengerMainActivity extends BaseActivity implements LocationSourc
 
         mOptionList = new ArrayList<>();
         mOptionList.add("退出登录");
-        mOptionAdapter = new PassengerOptionAdapter(PassengerMainActivity.this,mOptionList);
+        mOptionAdapter = new PassengerOptionAdapter(PassengerMainActivity.this, mOptionList);
         mRecyclerView.setAdapter(mOptionAdapter);
         //OptionItem点击监听
         mOptionAdapter.setOnItemClickListener(new PassengerOptionAdapter.OnItemClickListener() {
@@ -151,10 +173,11 @@ public class PassengerMainActivity extends BaseActivity implements LocationSourc
             public void itemLongClick(View view, int position) {
 
                 String option = mOptionList.get(position);
-                if (option.equals("退出登录")){
+                if (option.equals("退出登录")) {
                     BmobUser.logOut(PassengerMainActivity.this);
-                    Intent intent=new Intent(PassengerMainActivity.this,SplashActivity.class);
+                    Intent intent = new Intent(PassengerMainActivity.this, SplashActivity.class);
                     startActivity(intent);
+                    finish();
                 }
             }
         });
@@ -207,7 +230,7 @@ public class PassengerMainActivity extends BaseActivity implements LocationSourc
             @Override
             public void onCameraChange(CameraPosition cameraPosition) {
 
-                if (!isFirstIn) {
+                if (!isFirstIn && !isStopUpdateStart) {
                     //上车位置Marker一直显示在地图中心
                     mMarker.setPosition(cameraPosition.target);
                     //地图移动时，隐藏InfoWindow
@@ -224,9 +247,21 @@ public class PassengerMainActivity extends BaseActivity implements LocationSourc
                 mMarker.showInfoWindow();
                 //逆地理编码，坐标 → 地址，显示到界面上
                 LatLonPoint point = new LatLonPoint(cameraPosition.target.latitude, cameraPosition.target.longitude);
-                RegeocodeQuery query = new RegeocodeQuery(point, 50, GeocodeSearch.AMAP);
+
                 //发送逆地理编码请求
-                mGeocodeSearch.getFromLocationAsyn(query);
+                if (!isStopUpdateStart) {
+                    RegeocodeQuery query = new RegeocodeQuery(point, 50, GeocodeSearch.AMAP);
+                    mGeocodeSearch.getFromLocationAsyn(query);
+
+                    //更新上车点
+                    if (mStartLatLonPoint == null) {
+                        mStartLatLonPoint = new LatLonPoint(point.getLatitude(), point.getLongitude());
+                    } else {
+                        mStartLatLonPoint.setLatitude(point.getLatitude());
+                        mStartLatLonPoint.setLongitude(point.getLongitude());
+                    }
+                }
+
             }
         });
 
@@ -439,8 +474,9 @@ public class PassengerMainActivity extends BaseActivity implements LocationSourc
                 //定位成功
 
                 mLocationChangedListener.onLocationChanged(aMapLocation);
-                //定位到的左边
+                //定位到的位置
                 mLocateLatLng = new LatLng(aMapLocation.getLatitude(), aMapLocation.getLongitude());
+                mCity = aMapLocation.getCity();
 
                 //设置云图显示的中心点，搜索范围
                 LatLonPoint cloudPoint = new LatLonPoint(mLocateLatLng.latitude, mLocateLatLng.longitude);
@@ -455,13 +491,13 @@ public class PassengerMainActivity extends BaseActivity implements LocationSourc
                 }
 
                 //Camera移动到定位位置
-                CameraPosition position = new CameraPosition(mLocateLatLng,16,0,0);
+                CameraPosition position = new CameraPosition(mLocateLatLng, 16, 0, 0);
                 CameraUpdate cameraUpdate = CameraUpdateFactory.newCameraPosition(position);
-                if (isFirstIn){
+                if (isFirstIn) {
                     mAMap.animateCamera(cameraUpdate, new AMap.CancelableCallback() {
                         @Override
                         public void onFinish() {
-                            isFirstIn=false;
+                            isFirstIn = false;
 
                             //显示上车位置Marker
                             MarkerOptions markerOptions = new MarkerOptions();
@@ -476,6 +512,71 @@ public class PassengerMainActivity extends BaseActivity implements LocationSourc
 
                         @Override
                         public void onCancel() {
+
+                        }
+                    });
+                }
+            }
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (resultCode == 0) {
+            Bundle bundle = data.getExtras();
+            Tip tip = bundle.getParcelable("tip");
+            if (tip != null) {
+                mTvDestination.setText(tip.getName());
+                mEndLatLonPoint = tip.getPoint();
+
+                //驾车路径规划
+                if (mEndLatLonPoint != null) {
+                    RouteSearch routeSearch = new RouteSearch(PassengerMainActivity.this);
+                    RouteSearch.FromAndTo fromAndTo = new RouteSearch.FromAndTo(mStartLatLonPoint, mEndLatLonPoint);
+                    RouteSearch.DriveRouteQuery driveRouteQuery = new RouteSearch.DriveRouteQuery(fromAndTo, RouteSearch.DrivingDefault, null, null, "");
+                    routeSearch.calculateDriveRouteAsyn(driveRouteQuery);
+                    routeSearch.setRouteSearchListener(new RouteSearch.OnRouteSearchListener() {
+                        @Override
+                        public void onBusRouteSearched(BusRouteResult busRouteResult, int i) {
+
+                        }
+
+                        @Override
+                        public void onDriveRouteSearched(DriveRouteResult driveRouteResult, int i) {
+
+                            if (i == 0) {
+                                if (driveRouteResult != null && driveRouteResult.getPaths().size() > 0) {
+                                    //停止更新上车地点
+                                    isStopUpdateStart = true;
+
+                                    DrivePath drivePath = driveRouteResult.getPaths().get(0);
+                                    //路段列表
+                                    List<DriveStep> driveStepList = drivePath.getSteps();
+                                    //遍历driveStepList，得到驾车距离，预估用时
+                                    float totalDistance = 0.0f;
+                                    float totalDuration = 0.0f;
+                                    for (DriveStep driverStep : driveStepList) {
+                                        totalDistance = totalDistance + driverStep.getDistance();
+                                        totalDuration = totalDuration + driverStep.getDuration();
+                                    }
+
+                                    mTvCost.setVisibility(View.VISIBLE);
+                                    mTvCost.setText("距离：".concat(String.valueOf(totalDistance)).concat("时间：").concat(String.valueOf(totalDuration)));
+                                    mBtnLookForCar.setVisibility(View.VISIBLE);
+
+                                    mAMap.clear();
+                                    DrivingRouteOverlay drivingRouteOverlay = new DrivingRouteOverlay(PassengerMainActivity.this, mAMap, drivePath, driveRouteResult.getStartPos(), driveRouteResult.getTargetPos());
+                                    drivingRouteOverlay.removeFromMap();
+                                    drivingRouteOverlay.addToMap();
+                                    drivingRouteOverlay.zoomToSpan();
+                                }
+                            }
+                        }
+
+                        @Override
+                        public void onWalkRouteSearched(WalkRouteResult walkRouteResult, int i) {
 
                         }
                     });

@@ -5,7 +5,6 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -19,7 +18,7 @@ import butterknife.ButterKnife;
 /**
  * Created by Administrator on 2016/3/8.
  */
-public class PassengerOptionAdapter extends RecyclerView.Adapter<PassengerOptionAdapter.PassengerViewHolder> {
+public class EndRecommendAdapter extends RecyclerView.Adapter<EndRecommendAdapter.MyViewHolder> {
 
     private Context mContext;
     private List<String> mDataList;
@@ -27,7 +26,7 @@ public class PassengerOptionAdapter extends RecyclerView.Adapter<PassengerOption
 
     private OnItemClickListener mOnItemClickListener;
 
-    public PassengerOptionAdapter(Context context, List<String> dataList) {
+    public EndRecommendAdapter(Context context, List<String> dataList) {
         mContext = context;
         mDataList = dataList;
 
@@ -42,24 +41,24 @@ public class PassengerOptionAdapter extends RecyclerView.Adapter<PassengerOption
         void itemLongClick(View view, int position);
     }
 
-    @Override
-    public PassengerViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-
-        View view = mInflater.inflate(R.layout.list_item_passenger_option, parent, false);
-        return new PassengerViewHolder(view);
+    public void replaceData(List<String> newDataList){
+        mDataList.clear();
+        mDataList.addAll(newDataList);
+        notifyDataSetChanged();
     }
 
     @Override
-    public void onBindViewHolder(final PassengerViewHolder holder, final int position) {
+    public MyViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+
+        View view = mInflater.inflate(R.layout.list_item_end_recommend, parent, false);
+        return new MyViewHolder(view);
+    }
+
+    @Override
+    public void onBindViewHolder(final MyViewHolder holder, final int position) {
 
         String option = mDataList.get(position);
         holder.mTv.setText(option);
-
-        switch (position){
-            case 0:
-                holder.mIv.setImageResource(R.drawable.cancel);
-                break;
-        }
 
         if (mOnItemClickListener!=null){
             holder.mLayout.setOnClickListener(new View.OnClickListener() {
@@ -77,16 +76,15 @@ public class PassengerOptionAdapter extends RecyclerView.Adapter<PassengerOption
         return mDataList.size();
     }
 
-    class PassengerViewHolder extends RecyclerView.ViewHolder {
+    class MyViewHolder extends RecyclerView.ViewHolder {
 
-        @Bind(R.id.layout_list_item_passenger_option)
+        @Bind(R.id.layout_list_item_end_recommend)
         LinearLayout mLayout;
-        @Bind(R.id.iv_list_item_passenger_option)
-        ImageView mIv;
-        @Bind(R.id.tv_list_item_passenger_option)
+        @Bind(R.id.tv_list_item_end_recommend)
         TextView mTv;
 
-        public PassengerViewHolder(View itemView) {
+
+        public MyViewHolder(View itemView) {
             super(itemView);
 
             ButterKnife.bind(this, itemView);
