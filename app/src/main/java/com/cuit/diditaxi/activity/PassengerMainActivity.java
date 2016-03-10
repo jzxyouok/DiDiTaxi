@@ -52,19 +52,35 @@ import com.amap.api.services.route.WalkRouteResult;
 import com.cuit.diditaxi.R;
 import com.cuit.diditaxi.adapter.PassengerOptionAdapter;
 import com.cuit.diditaxi.model.CloudMarkerOverlay;
+import com.cuit.diditaxi.model.Event;
 import com.cuit.diditaxi.utils.NumberUtil;
 import com.cuit.diditaxi.utils.TimeUtil;
 import com.cuit.diditaxi.view.ListRecyclerViewDivider;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import cn.bmob.v3.BmobUser;
+import cn.jpush.im.android.api.JMessageClient;
+import cn.jpush.im.android.api.callback.CreateGroupCallback;
+import cn.jpush.im.android.api.content.TextContent;
+import cn.jpush.im.android.api.model.Conversation;
+import cn.jpush.im.android.api.model.Message;
+import cn.jpush.im.android.eventbus.EventBus;
+import cn.jpush.im.api.BasicCallback;
 
 public class PassengerMainActivity extends BaseActivity implements LocationSource, AMapLocationListener {
+
+
+    //------JMessage-----
+    private long mGroupId;
+    private Conversation mConversation;
+
 
     //------地图-----
     private AMap mAMap;
@@ -133,6 +149,28 @@ public class PassengerMainActivity extends BaseActivity implements LocationSourc
     @OnClick(R.id.btn_look_for_car)
     void lookForCar() {
         setupMap();
+
+        //发送消息
+        TextContent text = new TextContent("点击查看详情");
+        Map<String, String> extraMap = new HashMap<>();
+        extraMap.put("flag","lookForCar");
+        extraMap.put("StartLat", String.valueOf(mStartLatLonPoint.getLatitude()));
+        extraMap.put("StartLong", String.valueOf(mStartLatLonPoint.getLongitude()));
+        extraMap.put("EndLat", String.valueOf(mEndLatLonPoint.getLatitude()));
+        extraMap.put("EndLong", String.valueOf(mEndLatLonPoint.getLongitude()));
+        text.setExtras(extraMap);
+
+        Message textMsg =mConversation.createSendMessage(text);
+        textMsg.setOnSendCompleteCallback(new BasicCallback() {
+            @Override
+            public void gotResult(int i, String s) {
+                if (i==0){
+                    showToastShort("正在寻找车辆，请稍后...");
+                }
+            }
+        });
+        JMessageClient.sendMessage(textMsg);
+        EventBus.getDefault().post(new Event.MessageEvent(textMsg));
     }
 
     @OnClick(R.id.tv_passenger_start)
@@ -177,6 +215,7 @@ public class PassengerMainActivity extends BaseActivity implements LocationSourc
                 String option = mOptionList.get(position);
                 if (option.equals("退出登录")) {
                     BmobUser.logOut(PassengerMainActivity.this);
+                    JMessageClient.logout();
                     Intent intent = new Intent(PassengerMainActivity.this, SplashActivity.class);
                     startActivity(intent);
                     finish();
@@ -369,6 +408,33 @@ public class PassengerMainActivity extends BaseActivity implements LocationSourc
                         cloudItemList.get(0).getCloudImage().size();
                         mCloudMarkerOverlay = new CloudMarkerOverlay(cloudItemList, mAMap);
                         mCloudMarkerOverlay.addCloudMarkerToMap();
+
+                        //从CloudItem中获取到周围司机用户名，使用JMessage发送群发信息，通知司机抢单
+                        //CloudItem.getTitle
+                        final List<String> driverList = new ArrayList<String>();
+                        for (CloudItem cloudItem : cloudItemList) {
+                            driverList.add(cloudItem.getTitle());
+                        }
+
+                        JMessageClient.createGroup("新订单通知!!!", "", new CreateGroupCallback() {
+                            @Override
+                            public void gotResult(int i, String s, long l) {
+
+                                if (i == 0) {
+                                    mGroupId = l;
+                                    mConversation = Conversation.createGroupConversation(mGroupId);
+                                    //添加司机名单到发送列表
+                                    JMessageClient.addGroupMembers(mGroupId, driverList, new BasicCallback() {
+                                        @Override
+                                        public void gotResult(int i, String s) {
+                                            if (i == 0) {
+                                                mBtnLookForCar.setEnabled(true);
+                                            }
+                                        }
+                                    });
+                                }
+                            }
+                        });
                     }
                 }
             }
@@ -388,16 +454,16 @@ public class PassengerMainActivity extends BaseActivity implements LocationSourc
 
     @Override
     protected void onPause() {
-        super.onPause();
         mMapView.onPause();
+        super.onPause();
         deactivate();
     }
 
 
     @Override
     protected void onDestroy() {
-        super.onDestroy();
         mMapView.onDestroy();
+        super.onDestroy();
     }
 
     @Override
@@ -468,7 +534,6 @@ public class PassengerMainActivity extends BaseActivity implements LocationSourc
 
     @Override
     public void onLocationChanged(AMapLocation aMapLocation) {
-
 
         if (aMapLocation != null && mLocationChangedListener != null) {
 

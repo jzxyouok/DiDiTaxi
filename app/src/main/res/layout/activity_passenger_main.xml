@@ -19,7 +19,7 @@
             <android.support.v7.widget.Toolbar
                 android:id="@+id/toolbar_passenger_main"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="48dp"
                 android:background="?attr/colorPrimary">
             </android.support.v7.widget.Toolbar>
 
@@ -61,8 +61,7 @@
                         android:drawableLeft="@drawable/icon_start"
                         android:drawablePadding="8dp"
                         android:gravity="center_vertical"
-                        android:singleLine="true"
-                        />
+                        android:singleLine="true"/>
 
                     <View
                         android:layout_width="match_parent"
@@ -110,7 +109,8 @@
                         android:text="寻找车辆"
                         android:textColor="@android:color/black"
                         android:textSize="16sp"
-                        android:visibility="gone"/>
+                        android:visibility="gone"
+                        android:enabled="false"/>
                 </LinearLayout>
             </FrameLayout>
 

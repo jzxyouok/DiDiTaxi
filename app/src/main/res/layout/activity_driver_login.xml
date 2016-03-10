@@ -1,13 +1,71 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:paddingBottom="@dimen/activity_vertical_margin"
-    android:paddingLeft="@dimen/activity_horizontal_margin"
-    android:paddingRight="@dimen/activity_horizontal_margin"
-    android:paddingTop="@dimen/activity_vertical_margin"
-    tools:context="com.cuit.diditaxi.activity.DriverLoginActivity">
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              xmlns:tools="http://schemas.android.com/tools"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:paddingLeft="32dp"
+              android:paddingRight="32dp"
+              android:orientation="vertical"
+              android:background="@drawable/driver_login_bg"
+              tools:context="com.cuit.diditaxi.activity.DriverLoginActivity">
 
-</RelativeLayout>
+    <EditText
+        android:id="@+id/et_driver_login_username"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="120dp"
+        android:background="@android:color/transparent"
+        android:drawableLeft="@drawable/login_username"
+        android:drawablePadding="20dp"
+        android:hint="用户名"
+        android:inputType="text"
+        android:paddingBottom="10dp"
+        android:singleLine="true"
+        android:textColor="@color/white_01"
+        android:textColorHint="@color/tran_70_white_01"
+        android:textCursorDrawable="@null"/>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="0.6dp"
+        android:layout_marginLeft="16dp"
+        android:layout_marginRight="16dp"
+        android:background="@color/white_01"/>
+
+    <EditText
+        android:id="@+id/et_driver_login_password"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:background="@android:color/transparent"
+        android:drawableLeft="@drawable/login_password"
+        android:drawablePadding="20dp"
+        android:hint="密码"
+        android:imeOptions="actionUnspecified"
+        android:inputType="textPassword"
+        android:paddingBottom="10dp"
+        android:paddingTop="10dp"
+        android:singleLine="true"
+        android:textColor="@color/white_01"
+        android:textColorHint="@color/tran_70_white_01"
+        android:textCursorDrawable="@null"/>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="0.6dp"
+        android:layout_marginLeft="16dp"
+        android:layout_marginRight="16dp"
+        android:background="@color/white_01"/>
+
+    <Button
+        android:id="@+id/btn_driver_login"
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:layout_marginTop="30dp"
+        android:background="@drawable/bg_btn_splash"
+        android:gravity="center"
+        android:text="登录"
+        android:textSize="18sp"
+        android:textColor="@color/white_01"/>
+
+</LinearLayout>

@@ -5,7 +5,13 @@ import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
 
+import com.cuit.diditaxi.activity.DriverOrderDetailActivity;
+import com.cuit.diditaxi.model.SerializableMap;
+
+import java.util.Map;
+
 import cn.jpush.im.android.api.JMessageClient;
+import cn.jpush.im.android.api.content.TextContent;
 import cn.jpush.im.android.api.enums.ContentType;
 import cn.jpush.im.android.api.enums.ConversationType;
 import cn.jpush.im.android.api.event.NotificationClickEvent;
@@ -42,6 +48,20 @@ public class NotificationClickEventReceiver {
             Intent intent = new Intent();
             if (msg.getContentType().equals(ContentType.text)){
 
+                TextContent text = (TextContent) msg.getContent();
+                Map<String, String> extraMap;
+                extraMap=text.getStringExtras();
+                SerializableMap map = new SerializableMap();
+                map.setMap(extraMap);
+
+                if (extraMap.get("flag").equals("lookForCar")){
+                    //司机跳转到订单详情界面
+                    intent.setClass(mContext, DriverOrderDetailActivity.class);
+                    intent.setAction(Intent.ACTION_MAIN);
+                    intent.putExtra("order", map);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                    mContext.startActivity(intent);
+                }
             }
         }
     }

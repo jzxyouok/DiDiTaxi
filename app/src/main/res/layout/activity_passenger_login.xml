@@ -68,11 +68,12 @@
         <Button
             android:id="@+id/btn_passenger_login"
             android:layout_width="match_parent"
-            android:layout_height="48dp"
+            android:layout_height="40dp"
             android:layout_marginTop="30dp"
             android:background="@drawable/bg_btn_splash"
             android:gravity="center"
             android:text="登录"
+            android:textSize="18sp"
             android:textColor="@color/white_01"/>
 
     </LinearLayout>
