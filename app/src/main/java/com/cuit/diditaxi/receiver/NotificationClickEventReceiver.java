@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.util.Log;
 
 import com.cuit.diditaxi.activity.DriverOrderDetailActivity;
+import com.cuit.diditaxi.activity.PassengerDriverDetailActivity;
 import com.cuit.diditaxi.model.SerializableMap;
 
 import java.util.Map;
@@ -17,6 +18,7 @@ import cn.jpush.im.android.api.enums.ConversationType;
 import cn.jpush.im.android.api.event.NotificationClickEvent;
 import cn.jpush.im.android.api.model.Conversation;
 import cn.jpush.im.android.api.model.Message;
+import cn.jpush.im.android.api.model.UserInfo;
 
 public class NotificationClickEventReceiver {
     private static final String TAG = NotificationClickEventReceiver.class.getSimpleName();
@@ -49,6 +51,8 @@ public class NotificationClickEventReceiver {
             if (msg.getContentType().equals(ContentType.text)){
 
                 TextContent text = (TextContent) msg.getContent();
+                UserInfo userInfo = msg.getFromUser();
+                String username = userInfo.getUserName();
                 Map<String, String> extraMap;
                 extraMap=text.getStringExtras();
                 SerializableMap map = new SerializableMap();
@@ -58,7 +62,15 @@ public class NotificationClickEventReceiver {
                     //司机跳转到订单详情界面
                     intent.setClass(mContext, DriverOrderDetailActivity.class);
                     intent.setAction(Intent.ACTION_MAIN);
+                    intent.putExtra("username",username);
                     intent.putExtra("order", map);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                    mContext.startActivity(intent);
+                }else if (extraMap.get("flag").equals("driverAcceptOrder")){
+                    //乘客跳转到司机详情界面
+                    intent.setClass(mContext, PassengerDriverDetailActivity.class);
+                    intent.setAction(Intent.ACTION_MAIN);
+                    intent.putExtra("username", username);
                     intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
                     mContext.startActivity(intent);
                 }

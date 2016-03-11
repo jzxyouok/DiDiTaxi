@@ -27,6 +27,13 @@ import com.amap.api.maps.model.BitmapDescriptorFactory;
 import com.amap.api.maps.model.CameraPosition;
 import com.amap.api.maps.model.LatLng;
 import com.amap.api.maps.model.MyLocationStyle;
+import com.amap.api.maps.overlay.DrivingRouteOverlay;
+import com.amap.api.services.core.LatLonPoint;
+import com.amap.api.services.route.BusRouteResult;
+import com.amap.api.services.route.DrivePath;
+import com.amap.api.services.route.DriveRouteResult;
+import com.amap.api.services.route.RouteSearch;
+import com.amap.api.services.route.WalkRouteResult;
 import com.cuit.diditaxi.R;
 import com.cuit.diditaxi.adapter.PassengerOptionAdapter;
 import com.cuit.diditaxi.view.ListRecyclerViewDivider;
@@ -77,7 +84,7 @@ public class DriverMainActivity extends BaseActivity implements LocationSource, 
 
         //显示地图
         mMapView.onCreate(savedInstanceState);
-        if (mAMap==null){
+        if (mAMap == null) {
             mAMap = mMapView.getMap();
 
             setupMap();
@@ -140,6 +147,52 @@ public class DriverMainActivity extends BaseActivity implements LocationSource, 
                 }
             }
         });
+
+        //如果是由订单详情页面跳转过来
+        if (getIntent().getExtras() != null) {
+            Bundle bundle = getIntent().getExtras();
+            String flag = (String) bundle.get("flag");
+            if (flag!=null&&flag.equals("orderDetail")) {
+
+                showToastLong("请前往乘客上车地点");
+
+                LatLonPoint startPoint = (LatLonPoint) bundle.get("start");
+                LatLonPoint endPoint = (LatLonPoint) bundle.get("end");
+
+                //在地图上显示驾车路径
+                RouteSearch routeSearch = new RouteSearch(getApplicationContext());
+                RouteSearch.FromAndTo fromAndTo = new RouteSearch.FromAndTo(startPoint, endPoint);
+                RouteSearch.DriveRouteQuery driveRouteQuery = new RouteSearch.DriveRouteQuery(fromAndTo, RouteSearch.DrivingDefault, null, null, "");
+                routeSearch.calculateDriveRouteAsyn(driveRouteQuery);
+                routeSearch.setRouteSearchListener(new RouteSearch.OnRouteSearchListener() {
+                    @Override
+                    public void onBusRouteSearched(BusRouteResult busRouteResult, int i) {
+
+                    }
+
+                    @Override
+                    public void onDriveRouteSearched(DriveRouteResult driveRouteResult, int i) {
+
+                        if (i==0){
+                            DrivePath drivePath = driveRouteResult.getPaths().get(0);
+                            mAMap.clear();
+                            DrivingRouteOverlay drivingRouteOverlay = new DrivingRouteOverlay(getApplicationContext(), mAMap, drivePath, driveRouteResult.getStartPos(), driveRouteResult.getTargetPos());
+                            drivingRouteOverlay.setNodeIconVisibility(false);
+                            drivingRouteOverlay.addToMap();
+                            drivingRouteOverlay.zoomToSpan();
+                        }
+                    }
+
+                    @Override
+                    public void onWalkRouteSearched(WalkRouteResult walkRouteResult, int i) {
+
+                    }
+                });
+
+
+            }
+        }
+
     }
 
     private void setupMap() {
@@ -283,17 +336,17 @@ public class DriverMainActivity extends BaseActivity implements LocationSource, 
                 //Camera移动到定位位置
                 CameraPosition position = new CameraPosition(mLocateLatLng, 16, 0, 0);
                 CameraUpdate cameraUpdate = CameraUpdateFactory.newCameraPosition(position);
-                    mAMap.animateCamera(cameraUpdate, new AMap.CancelableCallback() {
-                        @Override
-                        public void onFinish() {
+                mAMap.animateCamera(cameraUpdate, new AMap.CancelableCallback() {
+                    @Override
+                    public void onFinish() {
 
-                        }
+                    }
 
-                        @Override
-                        public void onCancel() {
+                    @Override
+                    public void onCancel() {
 
-                        }
-                    });
+                    }
+                });
 
             }
         }

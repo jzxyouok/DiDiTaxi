@@ -51,6 +51,9 @@ public class PassengerSelectEndActivity extends BaseActivity {
         } else {
 
             if (mCity != null) {
+
+                closeKeyboard();
+
                 String searchKeyword = mEtKeyword.getText().toString().trim();
                 //输入提示
                 InputtipsQuery inputTipsQuery = new InputtipsQuery(searchKeyword, mCity);

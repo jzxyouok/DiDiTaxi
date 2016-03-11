@@ -1,7 +1,10 @@
 package com.cuit.diditaxi.activity;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Toast;
 
 import cn.jpush.im.android.api.JMessageClient;
@@ -65,5 +68,16 @@ public class BaseActivity extends AppCompatActivity {
 
     public void showToastLong(String content){
         Toast.makeText(getApplicationContext(),content,Toast.LENGTH_LONG).show();
+    }
+
+    /**
+     * 关闭软键盘
+     */
+    public void closeKeyboard(){
+        View view = getWindow().peekDecorView();
+        if (view != null) {
+            InputMethodManager inputManger = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+            inputManger.hideSoftInputFromWindow(view.getWindowToken(), 0);
+        }
     }
 }

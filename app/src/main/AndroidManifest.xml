@@ -152,6 +152,8 @@
         </activity>
         <activity android:name=".activity.DriverOrderDetailActivity">
         </activity>
+        <activity android:name=".activity.PassengerDriverDetailActivity">
+        </activity>
     </application>
 
 </manifest>
