@@ -7,6 +7,8 @@ import android.util.Log;
 
 import com.cuit.diditaxi.activity.DriverOrderDetailActivity;
 import com.cuit.diditaxi.activity.PassengerDriverDetailActivity;
+import com.cuit.diditaxi.activity.PassengerMainActivity;
+import com.cuit.diditaxi.activity.PassengerTipEndActivity;
 import com.cuit.diditaxi.model.SerializableMap;
 
 import java.util.Map;
@@ -73,7 +75,21 @@ public class NotificationClickEventReceiver {
                     intent.putExtra("username", username);
                     intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
                     mContext.startActivity(intent);
+                }else if (extraMap.get("flag").equals("start")){
+                    intent.setClass(mContext, PassengerMainActivity.class);
+                    intent.setAction(Intent.ACTION_MAIN);
+                    intent.putExtra("username", username);
+                    intent.putExtra("route",map);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                    mContext.startActivity(intent);
+                }else if (extraMap.get("flag").equals("end")){
+                    intent.setClass(mContext, PassengerTipEndActivity.class);
+                    intent.setAction(Intent.ACTION_MAIN);
+                    intent.putExtra("username", username);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                    mContext.startActivity(intent);
                 }
+
             }
         }
     }

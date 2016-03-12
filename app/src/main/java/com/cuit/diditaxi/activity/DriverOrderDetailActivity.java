@@ -77,6 +77,7 @@ public class DriverOrderDetailActivity extends BaseActivity {
                                     intent.putExtra("flag","orderDetail");
                                     intent.putExtra("start", mStartPoint);
                                     intent.putExtra("end", mEndPoint);
+                                    intent.putExtra("passenger", mPassengerUsername);
 
                                     startActivity(intent);
                                 }

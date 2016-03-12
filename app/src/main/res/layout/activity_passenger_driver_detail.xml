@@ -1,8 +1,35 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
                 xmlns:tools="http://schemas.android.com/tools"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
+              android:orientation="vertical"
                 tools:context="com.cuit.diditaxi.activity.PassengerDriverDetailActivity">
 
-</RelativeLayout>
+  <TextView
+      android:id="@+id/tv_passenger_driver_detail_name"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:gravity="center_horizontal"
+      android:textSize="18sp"
+      android:layout_marginTop="80dp"
+      tools:text="司机：匹诺曹"/>
+
+    <TextView
+        android:id="@+id/tv_passenger_driver_detail_car_number"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:gravity="center_horizontal"
+        tools:text="车牌号：川A 111111"/>
+
+    <TextView
+        android:id="@+id/tv_passenger_driver_detail_tip"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_horizontal"
+        android:layout_marginTop="10dp"
+        android:textSize="16sp"
+        android:visibility="invisible"
+        android:text="正在路上，请在上车地点等候"/>
+</LinearLayout>

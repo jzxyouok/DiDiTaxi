@@ -10,7 +10,9 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import com.amap.api.location.AMapLocation;
 import com.amap.api.location.AMapLocationClient;
@@ -36,15 +38,26 @@ import com.amap.api.services.route.RouteSearch;
 import com.amap.api.services.route.WalkRouteResult;
 import com.cuit.diditaxi.R;
 import com.cuit.diditaxi.adapter.PassengerOptionAdapter;
+import com.cuit.diditaxi.model.Event;
 import com.cuit.diditaxi.view.ListRecyclerViewDivider;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
+import butterknife.OnClick;
 import cn.bmob.v3.BmobUser;
 import cn.jpush.im.android.api.JMessageClient;
+import cn.jpush.im.android.api.callback.GetUserInfoCallback;
+import cn.jpush.im.android.api.content.TextContent;
+import cn.jpush.im.android.api.model.Conversation;
+import cn.jpush.im.android.api.model.Message;
+import cn.jpush.im.android.api.model.UserInfo;
+import cn.jpush.im.android.eventbus.EventBus;
+import cn.jpush.im.api.BasicCallback;
 
 public class DriverMainActivity extends BaseActivity implements LocationSource, AMapLocationListener {
 
@@ -55,6 +68,11 @@ public class DriverMainActivity extends BaseActivity implements LocationSource, 
     private String mCity;
     //定位结果，坐标
     private LatLng mLocateLatLng = null;
+
+    private LatLonPoint mStartPoint;
+    private LatLonPoint mEndPoint;
+
+    private String mPassenger;
 
     @Bind(R.id.drawer_driver_main)
     DrawerLayout mDrawerLayout;
@@ -74,6 +92,89 @@ public class DriverMainActivity extends BaseActivity implements LocationSource, 
     MapView mMapView;
 
     private AMap mAMap;
+
+    @Bind(R.id.tv_driver_main_tip)
+    TextView mTvTip;
+
+    @Bind(R.id.btn_driver_main_found_passenger)
+    Button mBtnFoundPassenger;
+
+    @Bind(R.id.layout_driver_main_tip)
+    LinearLayout mLayoutTip;
+
+    @OnClick(R.id.btn_driver_main_found_passenger)
+    void foundPassenger() {
+
+        if (mBtnFoundPassenger.getText().equals("已接到乘客")) {
+
+            //发送通知，通知乘客行程开始
+            if (mPassenger != null) {
+                JMessageClient.getUserInfo(mPassenger, new GetUserInfoCallback() {
+                    @Override
+                    public void gotResult(int i, String s, UserInfo userInfo) {
+                        if (i == 0) {
+
+                            Conversation conversation = Conversation.createSingleConversation(userInfo.getUserName());
+
+                            TextContent textContent = new TextContent("行程开始");
+                            Map<String, String> extraMap = new HashMap<>();
+                            extraMap.put("flag", "start");
+                            extraMap.put("startLat", String.valueOf(mStartPoint.getLatitude()));
+                            extraMap.put("startLon",String.valueOf(mStartPoint.getLongitude()));
+                            extraMap.put("endLat", String.valueOf(mEndPoint.getLatitude()));
+                            extraMap.put("endLon",String.valueOf(mEndPoint.getLongitude()));
+                            textContent.setExtras(extraMap);
+
+                            Message message = conversation.createSendMessage(textContent);
+                            message.setOnSendCompleteCallback(new BasicCallback() {
+                                @Override
+                                public void gotResult(int i, String s) {
+                                    if (i == 0) {
+                                        mTvTip.setText("已接到乘客，请前往乘客目的地");
+                                        mBtnFoundPassenger.setText("已到达目的地");
+                                    }
+                                }
+                            });
+                            JMessageClient.sendMessage(message);
+                            EventBus.getDefault().post(new Event.MessageEvent(message));
+                        }
+                    }
+                });
+            }
+
+        } else if (mBtnFoundPassenger.getText().equals("已到达目的地")) {
+            //发送通知，通知乘客已抵达目的地
+            if (mPassenger != null) {
+                JMessageClient.getUserInfo(mPassenger, new GetUserInfoCallback() {
+                    @Override
+                    public void gotResult(int i, String s, UserInfo userInfo) {
+                        if (i == 0) {
+
+                            Conversation conversation = Conversation.createSingleConversation(userInfo.getUserName());
+
+                            TextContent textContent = new TextContent("行程结束");
+                            Map<String, String> extraMap = new HashMap<>();
+                            extraMap.put("flag", "end");
+                            textContent.setExtras(extraMap);
+
+                            Message message = conversation.createSendMessage(textContent);
+                            message.setOnSendCompleteCallback(new BasicCallback() {
+                                @Override
+                                public void gotResult(int i, String s) {
+                                    if (i == 0) {
+                                        mTvTip.setText("已到达乘客目的地");
+                                        mBtnFoundPassenger.setVisibility(View.GONE);
+                                    }
+                                }
+                            });
+                            JMessageClient.sendMessage(message);
+                            EventBus.getDefault().post(new Event.MessageEvent(message));
+                        }
+                    }
+                });
+            }
+        }
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -152,16 +253,18 @@ public class DriverMainActivity extends BaseActivity implements LocationSource, 
         if (getIntent().getExtras() != null) {
             Bundle bundle = getIntent().getExtras();
             String flag = (String) bundle.get("flag");
-            if (flag!=null&&flag.equals("orderDetail")) {
+            if (flag != null && flag.equals("orderDetail")) {
 
-                showToastLong("请前往乘客上车地点");
+                mTvTip.setVisibility(View.VISIBLE);
+                mBtnFoundPassenger.setVisibility(View.VISIBLE);
 
-                LatLonPoint startPoint = (LatLonPoint) bundle.get("start");
-                LatLonPoint endPoint = (LatLonPoint) bundle.get("end");
+                mStartPoint = (LatLonPoint) bundle.get("start");
+                mEndPoint = (LatLonPoint) bundle.get("end");
+                mPassenger = bundle.getString("passenger");
 
                 //在地图上显示驾车路径
                 RouteSearch routeSearch = new RouteSearch(getApplicationContext());
-                RouteSearch.FromAndTo fromAndTo = new RouteSearch.FromAndTo(startPoint, endPoint);
+                RouteSearch.FromAndTo fromAndTo = new RouteSearch.FromAndTo(mStartPoint, mEndPoint);
                 RouteSearch.DriveRouteQuery driveRouteQuery = new RouteSearch.DriveRouteQuery(fromAndTo, RouteSearch.DrivingDefault, null, null, "");
                 routeSearch.calculateDriveRouteAsyn(driveRouteQuery);
                 routeSearch.setRouteSearchListener(new RouteSearch.OnRouteSearchListener() {
@@ -173,7 +276,7 @@ public class DriverMainActivity extends BaseActivity implements LocationSource, 
                     @Override
                     public void onDriveRouteSearched(DriveRouteResult driveRouteResult, int i) {
 
-                        if (i==0){
+                        if (i == 0) {
                             DrivePath drivePath = driveRouteResult.getPaths().get(0);
                             mAMap.clear();
                             DrivingRouteOverlay drivingRouteOverlay = new DrivingRouteOverlay(getApplicationContext(), mAMap, drivePath, driveRouteResult.getStartPos(), driveRouteResult.getTargetPos());

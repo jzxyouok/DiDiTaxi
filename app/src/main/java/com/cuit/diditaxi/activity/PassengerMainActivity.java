@@ -53,6 +53,7 @@ import com.cuit.diditaxi.R;
 import com.cuit.diditaxi.adapter.PassengerOptionAdapter;
 import com.cuit.diditaxi.model.CloudMarkerOverlay;
 import com.cuit.diditaxi.model.Event;
+import com.cuit.diditaxi.model.SerializableMap;
 import com.cuit.diditaxi.utils.NumberUtil;
 import com.cuit.diditaxi.utils.TimeUtil;
 import com.cuit.diditaxi.view.ListRecyclerViewDivider;
@@ -146,6 +147,9 @@ public class PassengerMainActivity extends BaseActivity implements LocationSourc
     @Bind(R.id.btn_look_for_car)
     Button mBtnLookForCar;
 
+    @Bind(R.id.layout_passenger_main_tip)
+    LinearLayout mLayoutTip;
+
     @OnClick(R.id.btn_look_for_car)
     void lookForCar() {
         setupMap();
@@ -153,18 +157,18 @@ public class PassengerMainActivity extends BaseActivity implements LocationSourc
         //发送消息
         TextContent text = new TextContent("点击查看详情");
         Map<String, String> extraMap = new HashMap<>();
-        extraMap.put("flag","lookForCar");
+        extraMap.put("flag", "lookForCar");
         extraMap.put("StartLat", String.valueOf(mStartLatLonPoint.getLatitude()));
         extraMap.put("StartLong", String.valueOf(mStartLatLonPoint.getLongitude()));
         extraMap.put("EndLat", String.valueOf(mEndLatLonPoint.getLatitude()));
         extraMap.put("EndLong", String.valueOf(mEndLatLonPoint.getLongitude()));
         text.setExtras(extraMap);
 
-        Message textMsg =mConversation.createSendMessage(text);
+        Message textMsg = mConversation.createSendMessage(text);
         textMsg.setOnSendCompleteCallback(new BasicCallback() {
             @Override
             public void gotResult(int i, String s) {
-                if (i==0){
+                if (i == 0) {
                     showToastShort("正在寻找车辆，请稍后...");
                 }
             }
@@ -256,7 +260,58 @@ public class PassengerMainActivity extends BaseActivity implements LocationSourc
         if (mAMap == null) {
             mAMap = mMapView.getMap();
 
-            setupMap();
+            if (getIntent().getExtras() != null) {
+                if (getIntent().getExtras().get("route") != null) {
+
+                    //隐藏TipLayout
+                    mLayoutTip.setVisibility(View.INVISIBLE);
+                    //开始行程，绘制驾车路径
+                    SerializableMap map = (SerializableMap) getIntent().getExtras().get("route");
+                    Map<String, String> mMap = null;
+                    if (map != null) {
+                        mMap = map.getMap();
+                    }
+
+                    if (mMap != null) {
+                        LatLonPoint startPoint = new LatLonPoint(Double.valueOf(mMap.get("startLat")), Double.valueOf(mMap.get("startLon")));
+                        LatLonPoint endPoint = new LatLonPoint(Double.valueOf(mMap.get("endLat")), Double.valueOf(mMap.get("endLon")));
+
+                        RouteSearch routeSearch = new RouteSearch(getApplicationContext());
+                        RouteSearch.FromAndTo fromAndTo = new RouteSearch.FromAndTo(startPoint, endPoint);
+                        RouteSearch.DriveRouteQuery driveRouteQuery = new RouteSearch.DriveRouteQuery(fromAndTo, RouteSearch.DrivingDefault, null, null, "");
+                        routeSearch.calculateDriveRouteAsyn(driveRouteQuery);
+                        routeSearch.setRouteSearchListener(new RouteSearch.OnRouteSearchListener() {
+                            @Override
+                            public void onBusRouteSearched(BusRouteResult busRouteResult, int i) {
+
+                            }
+
+                            @Override
+                            public void onDriveRouteSearched(DriveRouteResult driveRouteResult, int i) {
+
+                                if (i == 0) {
+                                    if (driveRouteResult != null && driveRouteResult.getPaths().size() > 0) {
+                                        DrivePath drivePath = driveRouteResult.getPaths().get(0);
+                                        mAMap.clear();
+                                        DrivingRouteOverlay drivingRouteOverlay = new DrivingRouteOverlay(getApplicationContext(), mAMap, drivePath, driveRouteResult.getStartPos(), driveRouteResult.getTargetPos());
+                                        drivingRouteOverlay.setNodeIconVisibility(false);
+//                                    drivingRouteOverlay.removeFromMap();
+                                        drivingRouteOverlay.addToMap();
+                                        drivingRouteOverlay.zoomToSpan();
+                                    }
+                                }
+                            }
+
+                            @Override
+                            public void onWalkRouteSearched(WalkRouteResult walkRouteResult, int i) {
+
+                            }
+                        });
+                    }
+                }
+            } else {
+                setupMap();
+            }
         }
 
         //禁止DrawerLayout通过手势滑出

@@ -37,6 +37,45 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"/>
 
+                <LinearLayout
+                    android:id="@+id/layout_driver_main_tip"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="bottom"
+                    android:layout_marginBottom="18dp"
+                    android:layout_marginLeft="10dp"
+                    android:layout_marginRight="10dp"
+                    android:background="@drawable/bg_driver_main_tip_layout"
+                    android:orientation="vertical"
+                    android:paddingBottom="4dp"
+                    android:paddingLeft="8dp"
+                    android:paddingRight="8dp"
+                    android:paddingTop="2dp">
+
+                    <TextView
+                        android:id="@+id/tv_driver_main_tip"
+                        android:layout_width="match_parent"
+                        android:layout_height="46dp"
+                        android:layout_marginBottom="2dp"
+                        android:clickable="true"
+                        android:text="请前往乘客上车地点"
+                        android:textColor="@android:color/black"
+                        android:gravity="center"
+                       android:textSize="16sp"
+                        android:visibility="gone"
+                        android:singleLine="true"/>
+
+                    <Button
+                        android:id="@+id/btn_driver_main_found_passenger"
+                        android:layout_width="match_parent"
+                        android:layout_height="38dp"
+                        android:background="@drawable/bg_btn_passenger_main"
+                        android:text="已接到乘客"
+                        android:textColor="@android:color/black"
+                        android:textSize="16sp"
+                        android:visibility="gone"/>
+                </LinearLayout>
+
             </FrameLayout>
 
         </LinearLayout>
