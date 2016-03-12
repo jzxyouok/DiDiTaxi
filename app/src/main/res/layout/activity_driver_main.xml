@@ -50,7 +50,8 @@
                     android:paddingBottom="4dp"
                     android:paddingLeft="8dp"
                     android:paddingRight="8dp"
-                    android:paddingTop="2dp">
+                    android:paddingTop="2dp"
+                    android:visibility="invisible">
 
                     <TextView
                         android:id="@+id/tv_driver_main_tip"
@@ -62,7 +63,6 @@
                         android:textColor="@android:color/black"
                         android:gravity="center"
                        android:textSize="16sp"
-                        android:visibility="gone"
                         android:singleLine="true"/>
 
                     <Button
@@ -72,8 +72,7 @@
                         android:background="@drawable/bg_btn_passenger_main"
                         android:text="已接到乘客"
                         android:textColor="@android:color/black"
-                        android:textSize="16sp"
-                        android:visibility="gone"/>
+                        android:textSize="16sp"/>
                 </LinearLayout>
 
             </FrameLayout>

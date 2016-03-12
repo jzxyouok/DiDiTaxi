@@ -150,6 +150,9 @@ public class PassengerMainActivity extends BaseActivity implements LocationSourc
     @Bind(R.id.layout_passenger_main_tip)
     LinearLayout mLayoutTip;
 
+    @Bind(R.id.tv_passenger_main_looking_for_car_tip)
+    TextView mTvLookingTip;
+
     @OnClick(R.id.btn_look_for_car)
     void lookForCar() {
         setupMap();
@@ -169,7 +172,8 @@ public class PassengerMainActivity extends BaseActivity implements LocationSourc
             @Override
             public void gotResult(int i, String s) {
                 if (i == 0) {
-                    showToastShort("正在寻找车辆，请稍后...");
+                   mBtnLookForCar.setVisibility(View.GONE);
+                    mTvLookingTip.setVisibility(View.VISIBLE);
                 }
             }
         });

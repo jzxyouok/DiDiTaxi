@@ -112,6 +112,15 @@
                         android:textSize="16sp"
                         android:visibility="gone"
                         android:enabled="false"/>
+
+                    <TextView
+                        android:id="@+id/tv_passenger_main_looking_for_car_tip"
+                        android:layout_width="match_parent"
+                        android:layout_height="46dp"
+                        android:text="正在寻找车辆，请稍后..."
+                        android:gravity="center"
+                        android:textColor="@android:color/black"
+                        android:visibility="gone"/>
                 </LinearLayout>
             </FrameLayout>
 

@@ -255,8 +255,8 @@ public class DriverMainActivity extends BaseActivity implements LocationSource, 
             String flag = (String) bundle.get("flag");
             if (flag != null && flag.equals("orderDetail")) {
 
-                mTvTip.setVisibility(View.VISIBLE);
-                mBtnFoundPassenger.setVisibility(View.VISIBLE);
+                //显示TipLayout
+                mLayoutTip.setVisibility(View.VISIBLE);
 
                 mStartPoint = (LatLonPoint) bundle.get("start");
                 mEndPoint = (LatLonPoint) bundle.get("end");
