@@ -53,7 +53,9 @@ import com.cuit.diditaxi.R;
 import com.cuit.diditaxi.adapter.PassengerOptionAdapter;
 import com.cuit.diditaxi.model.CloudMarkerOverlay;
 import com.cuit.diditaxi.model.Event;
+import com.cuit.diditaxi.model.Order;
 import com.cuit.diditaxi.model.SerializableMap;
+import com.cuit.diditaxi.model.User;
 import com.cuit.diditaxi.utils.NumberUtil;
 import com.cuit.diditaxi.utils.TimeUtil;
 import com.cuit.diditaxi.view.ListRecyclerViewDivider;
@@ -67,6 +69,7 @@ import butterknife.Bind;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import cn.bmob.v3.BmobUser;
+import cn.bmob.v3.listener.SaveListener;
 import cn.jpush.im.android.api.JMessageClient;
 import cn.jpush.im.android.api.callback.CreateGroupCallback;
 import cn.jpush.im.android.api.content.TextContent;
@@ -77,6 +80,8 @@ import cn.jpush.im.api.BasicCallback;
 
 public class PassengerMainActivity extends BaseActivity implements LocationSource, AMapLocationListener {
 
+
+    private List<String> mDriverList = new ArrayList<>();
 
     //------JMessage-----
     private long mGroupId;
@@ -157,14 +162,18 @@ public class PassengerMainActivity extends BaseActivity implements LocationSourc
     void lookForCar() {
         setupMap();
 
+        final User user = BmobUser.getCurrentUser(getApplicationContext(), User.class);
+
         //发送消息
         TextContent text = new TextContent("点击查看详情");
         Map<String, String> extraMap = new HashMap<>();
         extraMap.put("flag", "lookForCar");
+        final String curTime = TimeUtil.getCurTime();
         extraMap.put("StartLat", String.valueOf(mStartLatLonPoint.getLatitude()));
         extraMap.put("StartLong", String.valueOf(mStartLatLonPoint.getLongitude()));
         extraMap.put("EndLat", String.valueOf(mEndLatLonPoint.getLatitude()));
         extraMap.put("EndLong", String.valueOf(mEndLatLonPoint.getLongitude()));
+        extraMap.put("createTime", curTime);
         text.setExtras(extraMap);
 
         Message textMsg = mConversation.createSendMessage(text);
@@ -172,8 +181,25 @@ public class PassengerMainActivity extends BaseActivity implements LocationSourc
             @Override
             public void gotResult(int i, String s) {
                 if (i == 0) {
-                   mBtnLookForCar.setVisibility(View.GONE);
-                    mTvLookingTip.setVisibility(View.VISIBLE);
+
+                    //生成Order，存入BMOB
+                    Order order = new Order();
+                    order.setPassenger(user.getUsername());
+                    order.setDriverList(mDriverList);
+                    order.setIsAccepted(false);
+                    order.setCreateTime(curTime);
+                    order.save(getApplicationContext(), new SaveListener() {
+                        @Override
+                        public void onSuccess() {
+                            mBtnLookForCar.setVisibility(View.GONE);
+                            mTvLookingTip.setVisibility(View.VISIBLE);
+                        }
+
+                        @Override
+                        public void onFailure(int i, String s) {
+                            showToastLong("暂时无法叫车，请稍后再试");
+                        }
+                    });
                 }
             }
         });
@@ -470,9 +496,8 @@ public class PassengerMainActivity extends BaseActivity implements LocationSourc
 
                         //从CloudItem中获取到周围司机用户名，使用JMessage发送群发信息，通知司机抢单
                         //CloudItem.getTitle
-                        final List<String> driverList = new ArrayList<String>();
                         for (CloudItem cloudItem : cloudItemList) {
-                            driverList.add(cloudItem.getTitle());
+                            mDriverList.add(cloudItem.getTitle());
                         }
 
                         JMessageClient.createGroup("新订单通知!!!", "", new CreateGroupCallback() {
@@ -483,7 +508,7 @@ public class PassengerMainActivity extends BaseActivity implements LocationSourc
                                     mGroupId = l;
                                     mConversation = Conversation.createGroupConversation(mGroupId);
                                     //添加司机名单到发送列表
-                                    JMessageClient.addGroupMembers(mGroupId, driverList, new BasicCallback() {
+                                    JMessageClient.addGroupMembers(mGroupId, mDriverList, new BasicCallback() {
                                         @Override
                                         public void gotResult(int i, String s) {
                                             if (i == 0) {

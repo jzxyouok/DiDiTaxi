@@ -13,14 +13,20 @@ import com.amap.api.services.geocoder.RegeocodeQuery;
 import com.amap.api.services.geocoder.RegeocodeResult;
 import com.cuit.diditaxi.R;
 import com.cuit.diditaxi.model.Event;
+import com.cuit.diditaxi.model.Order;
 import com.cuit.diditaxi.model.SerializableMap;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import cn.bmob.v3.BmobQuery;
+import cn.bmob.v3.listener.FindListener;
+import cn.bmob.v3.listener.UpdateListener;
 import cn.jpush.im.android.api.JMessageClient;
 import cn.jpush.im.android.api.callback.GetUserInfoCallback;
 import cn.jpush.im.android.api.content.TextContent;
@@ -31,6 +37,8 @@ import cn.jpush.im.android.eventbus.EventBus;
 import cn.jpush.im.api.BasicCallback;
 
 public class DriverOrderDetailActivity extends BaseActivity {
+
+    private Order mOrder;
 
     private String mPassengerUsername;
 
@@ -56,38 +64,61 @@ public class DriverOrderDetailActivity extends BaseActivity {
 
         if (!TextUtils.isEmpty(mTvStart.getText()) && !TextUtils.isEmpty(mTvEnd.getText())) {
 
-            //通知乘客，接单司机
-            JMessageClient.getUserInfo(mPassengerUsername, new GetUserInfoCallback() {
-                @Override
-                public void gotResult(int i, String s, UserInfo userInfo) {
-                    if (i == 0) {
-                        Conversation conversation = Conversation.createSingleConversation(userInfo.getUserName());
+            if (mOrder != null) {
+                if (!mOrder.getIsAccepted()) {
+                    //通知乘客，接单司机
+                    JMessageClient.getUserInfo(mPassengerUsername, new GetUserInfoCallback() {
+                        @Override
+                        public void gotResult(int i, String s, UserInfo userInfo) {
+                            if (i == 0) {
+                                Conversation conversation = Conversation.createSingleConversation(userInfo.getUserName());
 
-                        TextContent textContent = new TextContent("已接单");
-                        Map<String, String> extraMap = new HashMap<>();
-                        extraMap.put("flag", "driverAcceptOrder");
-                        textContent.setExtras(extraMap);
+                                TextContent textContent = new TextContent("已接单");
+                                Map<String, String> extraMap = new HashMap<>();
+                                extraMap.put("flag", "driverAcceptOrder");
+                                textContent.setExtras(extraMap);
 
-                        Message message = conversation.createSendMessage(textContent);
-                        message.setOnSendCompleteCallback(new BasicCallback() {
-                            @Override
-                            public void gotResult(int i, String s) {
-                                if (i == 0) {
-                                    Intent intent = new Intent(DriverOrderDetailActivity.this, DriverMainActivity.class);
-                                    intent.putExtra("flag","orderDetail");
-                                    intent.putExtra("start", mStartPoint);
-                                    intent.putExtra("end", mEndPoint);
-                                    intent.putExtra("passenger", mPassengerUsername);
+                                final Message message = conversation.createSendMessage(textContent);
+                                message.setOnSendCompleteCallback(new BasicCallback() {
+                                    @Override
+                                    public void gotResult(int i, String s) {
+                                        if (i == 0) {
 
-                                    startActivity(intent);
-                                }
+                                            //更新Order信息，设为不可再接
+                                            mOrder.setIsAccepted(true);
+                                            mOrder.update(getApplicationContext(), new UpdateListener() {
+                                                @Override
+                                                public void onSuccess() {
+                                                    Intent intent = new Intent(DriverOrderDetailActivity.this, DriverMainActivity.class);
+                                                    intent.putExtra("flag", "orderDetail");
+                                                    intent.putExtra("start", mStartPoint);
+                                                    intent.putExtra("end", mEndPoint);
+                                                    intent.putExtra("passenger", mPassengerUsername);
+
+                                                    startActivity(intent);
+                                                }
+
+                                                @Override
+                                                public void onFailure(int i, String s) {
+                                                    showToastLong("订单暂时不可接取");
+                                                }
+                                            });
+
+
+                                        }
+                                    }
+                                });
+                                JMessageClient.sendMessage(message);
+                                EventBus.getDefault().post(new Event.MessageEvent(message));
                             }
-                        });
-                        JMessageClient.sendMessage(message);
-                        EventBus.getDefault().post(new Event.MessageEvent(message));
-                    }
+                        }
+                    });
+                } else {
+                    showToastLong("此订单已被接取");
                 }
-            });
+            }
+
+
         }
     }
 
@@ -108,6 +139,32 @@ public class DriverOrderDetailActivity extends BaseActivity {
             }
             mStartPoint = new LatLonPoint(Double.valueOf(extraMap.get("StartLat")), Double.valueOf(extraMap.get("StartLong")));
             mEndPoint = new LatLonPoint(Double.valueOf(extraMap.get("EndLat")), Double.valueOf(extraMap.get("EndLong")));
+            String createTime = extraMap.get("createTime");
+            //BMOB，查询Order
+            BmobQuery<Order> andQuery = new BmobQuery<>();
+            List<BmobQuery<Order>> queryList = new ArrayList<>();
+            BmobQuery<Order> query1 = new BmobQuery<>();
+            query1.addWhereEqualTo("passenger", mPassengerUsername);
+            BmobQuery<Order> query2 = new BmobQuery<>();
+            query2.addWhereEqualTo("createTime", createTime);
+            queryList.add(query1);
+            queryList.add(query2);
+
+            andQuery.and(queryList);
+            andQuery.findObjects(getApplicationContext(), new FindListener<Order>() {
+                @Override
+                public void onSuccess(List<Order> list) {
+
+                    if (list.size() > 0) {
+                        mOrder = list.get(0);
+                    }
+                }
+
+                @Override
+                public void onError(int i, String s) {
+
+                }
+            });
         }
 
         if (mStartPoint != null && mEndPoint != null) {

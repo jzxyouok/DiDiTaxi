@@ -1,5 +1,9 @@
 package com.cuit.diditaxi.utils;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
+
 /**
  * Created by Administrator on 2016/3/9.
  */
@@ -29,5 +33,11 @@ public class TimeUtil {
         }else stringBuffer.append("0分");
 
         return stringBuffer.toString();
+    }
+
+    public static String getCurTime() {
+        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
+        Date date = new Date();
+        return df.format(date);
     }
 }
