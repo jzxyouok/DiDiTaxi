@@ -110,8 +110,7 @@
                         android:text="寻找车辆"
                         android:textColor="@android:color/black"
                         android:textSize="16sp"
-                        android:visibility="gone"
-                        android:enabled="false"/>
+                        android:visibility="gone"/>
 
                     <TextView
                         android:id="@+id/tv_passenger_main_looking_for_car_tip"

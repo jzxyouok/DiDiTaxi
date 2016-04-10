@@ -7,6 +7,7 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -176,35 +177,37 @@ public class PassengerMainActivity extends BaseActivity implements LocationSourc
         extraMap.put("createTime", curTime);
         text.setExtras(extraMap);
 
-        Message textMsg = mConversation.createSendMessage(text);
-        textMsg.setOnSendCompleteCallback(new BasicCallback() {
-            @Override
-            public void gotResult(int i, String s) {
-                if (i == 0) {
+        if (mConversation != null) {
+            Message textMsg = mConversation.createSendMessage(text);
+            textMsg.setOnSendCompleteCallback(new BasicCallback() {
+                @Override
+                public void gotResult(int i, String s) {
+                    if (i == 0) {
 
-                    //生成Order，存入BMOB
-                    Order order = new Order();
-                    order.setPassenger(user.getUsername());
-                    order.setDriverList(mDriverList);
-                    order.setIsAccepted(false);
-                    order.setCreateTime(curTime);
-                    order.save(getApplicationContext(), new SaveListener() {
-                        @Override
-                        public void onSuccess() {
-                            mBtnLookForCar.setVisibility(View.GONE);
-                            mTvLookingTip.setVisibility(View.VISIBLE);
-                        }
+                        //生成Order，存入BMOB
+                        Order order = new Order();
+                        order.setPassenger(user.getUsername());
+                        order.setDriverList(mDriverList);
+                        order.setIsAccepted(false);
+                        order.setCreateTime(curTime);
+                        order.save(getApplicationContext(), new SaveListener() {
+                            @Override
+                            public void onSuccess() {
+                                mBtnLookForCar.setVisibility(View.GONE);
+                                mTvLookingTip.setVisibility(View.VISIBLE);
+                            }
 
-                        @Override
-                        public void onFailure(int i, String s) {
-                            showToastLong("暂时无法叫车，请稍后再试");
-                        }
-                    });
+                            @Override
+                            public void onFailure(int i, String s) {
+                                showToastLong("暂时无法叫车，请稍后再试");
+                            }
+                        });
+                    }
                 }
-            }
-        });
-        JMessageClient.sendMessage(textMsg);
-        EventBus.getDefault().post(new Event.MessageEvent(textMsg));
+            });
+            JMessageClient.sendMessage(textMsg);
+            EventBus.getDefault().post(new Event.MessageEvent(textMsg));
+        }
     }
 
     @OnClick(R.id.tv_passenger_start)
@@ -487,7 +490,7 @@ public class PassengerMainActivity extends BaseActivity implements LocationSourc
             @Override
             public void onCloudSearched(CloudResult cloudResult, int i) {
 
-                if (cloudResult != null) {
+                if (i == 0) {
                     List<CloudItem> cloudItemList = cloudResult.getClouds();
                     if (cloudItemList.size() > 0) {
                         cloudItemList.get(0).getCloudImage().size();
@@ -498,6 +501,7 @@ public class PassengerMainActivity extends BaseActivity implements LocationSourc
                         //CloudItem.getTitle
                         for (CloudItem cloudItem : cloudItemList) {
                             mDriverList.add(cloudItem.getTitle());
+                            Log.d("司机", cloudItem.getTitle());
                         }
 
                         JMessageClient.createGroup("新订单通知!!!", "", new CreateGroupCallback() {
@@ -508,14 +512,17 @@ public class PassengerMainActivity extends BaseActivity implements LocationSourc
                                     mGroupId = l;
                                     mConversation = Conversation.createGroupConversation(mGroupId);
                                     //添加司机名单到发送列表
-                                    JMessageClient.addGroupMembers(mGroupId, mDriverList, new BasicCallback() {
-                                        @Override
-                                        public void gotResult(int i, String s) {
-                                            if (i == 0) {
-                                                mBtnLookForCar.setEnabled(true);
+                                    if (mDriverList.size() > 0) {
+
+                                        JMessageClient.addGroupMembers(mGroupId, mDriverList, new BasicCallback() {
+                                            @Override
+                                            public void gotResult(int i, String s) {
+
                                             }
-                                        }
-                                    });
+                                        });
+                                    }
+                                } else {
+                                    Log.d("Group", s);
                                 }
                             }
                         });
@@ -675,7 +682,7 @@ public class PassengerMainActivity extends BaseActivity implements LocationSourc
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        if (resultCode == 0) {
+        if (resultCode == 0 && data != null) {
             Bundle bundle = data.getExtras();
             Tip tip = bundle.getParcelable("tip");
             if (tip != null) {
@@ -714,9 +721,11 @@ public class PassengerMainActivity extends BaseActivity implements LocationSourc
                                     }
 
                                     mTvCost.setVisibility(View.VISIBLE);
+                                    if (mConversation != null) {
+                                        mBtnLookForCar.setVisibility(View.VISIBLE);
+                                    }
                                     //1米，0.005
                                     mTvCost.setText("预计费用:".concat(NumberUtil.roundHalfUp(totalDistance * 0.005)).concat("元  距离:").concat(NumberUtil.meterToKm(totalDistance)).concat("  预计用时:").concat(TimeUtil.formatSecond(totalDuration)));
-                                    mBtnLookForCar.setVisibility(View.VISIBLE);
 
                                     mAMap.clear();
                                     DrivingRouteOverlay drivingRouteOverlay = new DrivingRouteOverlay(PassengerMainActivity.this, mAMap, drivePath, driveRouteResult.getStartPos(), driveRouteResult.getTargetPos());

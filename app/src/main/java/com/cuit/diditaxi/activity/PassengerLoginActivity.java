@@ -30,6 +30,7 @@ public class PassengerLoginActivity extends BaseActivity {
     @OnClick(R.id.btn_passenger_login)
     void login() {
         mBtnLogin.setEnabled(false);
+        closeKeyboard();
 
         final User user = new User();
         user.setUsername(mEtUsername.getText().toString());
